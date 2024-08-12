@@ -1,0 +1,84 @@
+﻿@page "/Account/Roles"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<Data.ApplicationUser> UserManager
+@inject RoleManager<IdentityRole> RoleManager
+
+<h3>Roler och användare</h3>
+
+@code{
+    private string authMessage = "Användaren är inte inloggad!";
+    private string adminMessage = "Inget har hänt!";
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (authenticationState is not null)
+        {
+            var authState = await authenticationState;
+            var user = authState?.User;
+
+            if (user?.Identity is not null && user.Identity.IsAuthenticated)
+            {
+                authMessage = $"{user.Identity.Name} är inloggad!";
+            }
+        }
+    }
+
+    private void AnySecureMethod() 
+    {
+        adminMessage = "Admin har gjort något!";
+    }
+}
+
+
+<p>@authMessage</p>
+@* https://learn.microsoft.com/en-us/aspnet/core/blazor/security/?view=aspnetcore-8.0 *@
+
+<hr />
+
+
+
+<AuthorizeView Roles="User">
+    <Authorized>
+        <p>Hello, @context.User.Identity?.Name!</p>
+        <p>Innehåll som Users kan se</p>
+    </Authorized>
+    <NotAuthorized>
+        <p>You're not authorized as User</p>
+    </NotAuthorized>
+</AuthorizeView>
+<hr />
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        <p>Hello, @context.User.Identity?.Name!</p>
+        <p><button @onclick="AnySecureMethod">Adminknapp</button></p>
+        <p>@adminMessage</p>
+    </Authorized>
+    <NotAuthorized>
+        <p>You're not authorized as Admin</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+        
+ <h3>Roller</h3>
+ @foreach (var role in RoleManager.Roles)
+ {
+            <p>@role.Name</p>
+ }
+
+ <h3>Users</h3>
+    @foreach (var user in UserManager.Users)
+    {
+
+            <p>@user.UserName</p>
+
+            
+
+
+    }
+
+
+
+
